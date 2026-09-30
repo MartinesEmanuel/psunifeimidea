@@ -191,7 +191,7 @@ class _DiagnosePageState extends State<DiagnosePage> {
                 label: Text(option),
                 selected: _condition == option,
                 onSelected: (_) => setState(() => _condition = option),
-                selectedColor: AppColors.cyan.withOpacity(.20),
+                selectedColor: AppColors.cyan.withValues(alpha: .20),
                 backgroundColor: AppColors.panel,
                 side: BorderSide(color: _condition == option ? AppColors.cyan : AppColors.line),
               )).toList(),
@@ -332,7 +332,7 @@ class HistoryPage extends StatelessWidget {
                   return ListTile(
                     tileColor: AppColors.panel,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.line)),
-                    leading: CircleAvatar(backgroundColor: AppColors.cyan.withOpacity(.16), child: const Icon(Icons.graphic_eq, color: AppColors.cyan)),
+                    leading: CircleAvatar(backgroundColor: AppColors.cyan.withValues(alpha: .16), child: const Icon(Icons.graphic_eq, color: AppColors.cyan)),
                     title: Text(report.mainHypothesis),
                     subtitle: Text('${report.machineModel} · ${(report.confidence * 100).round()}%'),
                     trailing: const Icon(Icons.chevron_right),
@@ -353,7 +353,7 @@ class BrandHeader extends StatelessWidget {
   Widget build(BuildContext context) => Row(children: [
     Container(width: compact ? 38 : 44, height: compact ? 38 : 44, decoration: BoxDecoration(color: AppColors.cyan, borderRadius: BorderRadius.circular(13)), child: const Icon(Icons.multitrack_audio, color: AppColors.ink)),
     const SizedBox(width: 11),
-    Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+    const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('MIDEA · FIELD DIAGNOSE', style: TextStyle(fontSize: 11, color: AppColors.cyan, fontWeight: FontWeight.w800, letterSpacing: 1.25)),
       Text('Diagnóstico acústico', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
     ]),
@@ -372,7 +372,7 @@ class SafetyNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(color: AppColors.amber.withOpacity(.10), borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.amber.withOpacity(.35))),
+    decoration: BoxDecoration(color: AppColors.amber.withValues(alpha: .10), borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.amber.withValues(alpha: .35))),
     child: const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Icon(Icons.health_and_safety_outlined, color: AppColors.amber),
       SizedBox(width: 10),
@@ -387,7 +387,7 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-    decoration: BoxDecoration(color: AppColors.cyan.withOpacity(.14), borderRadius: BorderRadius.circular(99)),
+    decoration: BoxDecoration(color: AppColors.cyan.withValues(alpha: .14), borderRadius: BorderRadius.circular(99)),
     child: Text(level.toUpperCase(), style: const TextStyle(color: AppColors.cyan, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: .8)),
   );
 }
