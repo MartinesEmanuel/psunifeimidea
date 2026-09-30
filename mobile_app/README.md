@@ -15,9 +15,16 @@ A análise usa uma implementação simulada (`MockDiagnosisService`) para tornar
 ## Executar
 
 ```bash
-flutter create --platforms=android,ios .
 flutter pub get
 flutter run
 ```
 
 Requer Flutter 3.19+ e Dart 3.3+.
+
+## APK de release
+
+```bash
+flutter build apk --release
+```
+
+O APK será gerado em `build/app/outputs/flutter-apk/app-release.apk`.

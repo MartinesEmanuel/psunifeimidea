@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.diagnostico_acustico_mobile"
-    compileSdk = flutter.compileSdkVersion
+    // file_picker usa flutter_plugin_android_lifecycle, que requer API 36.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

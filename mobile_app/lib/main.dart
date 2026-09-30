@@ -120,6 +120,7 @@ class _DiagnosePageState extends State<DiagnosePage> {
   final _reportController = TextEditingController();
   final _service = MockDiagnosisService();
   PlatformFile? _media;
+  int? _mediaSize;
   String _condition = 'Em operação';
   bool _loading = false;
 
@@ -131,12 +132,17 @@ class _DiagnosePageState extends State<DiagnosePage> {
   }
 
   Future<void> _selectMedia() async {
-    final result = await FilePicker.platform.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['mp4', 'mov', 'm4a', 'mp3', 'wav', 'aac', 'ogg', 'flac'],
     );
-    if (result != null && result.files.isNotEmpty) {
-      setState(() => _media = result.files.single);
+    if (files.isNotEmpty) {
+      final selected = files.single;
+      final size = selected.lengthSync() ?? await selected.length();
+      setState(() {
+        _media = selected;
+        _mediaSize = size;
+      });
     }
   }
 
@@ -218,7 +224,7 @@ class _DiagnosePageState extends State<DiagnosePage> {
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Text(_media?.name ?? 'Adicionar áudio ou vídeo', style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 3),
-                      Text(_media == null ? 'MP4, MOV, WAV, MP3 e outros formatos aceitos' : '${(_media!.size / 1024 / 1024).toStringAsFixed(1)} MB · toque para trocar', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                      Text(_media == null ? 'MP4, MOV, WAV, MP3 e outros formatos aceitos' : '${((_mediaSize ?? 0) / 1024 / 1024).toStringAsFixed(1)} MB · toque para trocar', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
                     ])),
                     const Icon(Icons.chevron_right, color: AppColors.muted),
                   ],
