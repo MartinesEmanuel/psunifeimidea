@@ -65,6 +65,12 @@ modelos/                 # LightGBM, codificador e metadados do treino
 
 Para migrar a base, use **Baixar backup (.zip)** na barra lateral ou copie esses quatro itens para a pasta do projeto no computador de destino. Não copie `.venv/` entre máquinas.
 
+## Acesso administrativo
+
+O modo **Alimentação (Admin)** é protegido por senha. Antes de iniciar o aplicativo, copie `.streamlit/secrets.example.toml` para `.streamlit/secrets.toml` e substitua o valor de `admin_password` por uma senha forte. Esse arquivo é ignorado pelo Git e deve ficar somente no computador/servidor autorizado.
+
+Como alternativa de implantação, defina a variável de ambiente `DIAGNOSTICO_ADMIN_PASSWORD`. Técnicos sem essa senha podem apenas consultar o modo **Diagnóstico (Operador)**; o cadastro, exclusão e treinamento ficam restritos à área administrativa.
+
 ## Documentação
 
 - [Documentação técnica](docs/ARQUITETURA_TECNICA.md) — arquitetura, pipeline, persistência, modelo e operação para desenvolvimento.

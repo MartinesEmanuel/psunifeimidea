@@ -38,13 +38,13 @@ Arquivo enviado + laudo
 
 ### 3.1 Alimentação
 
-`alimentar_sistema_em_lote()` valida todos os blocos da interface antes do processamento. Para cada arquivo, o sistema calcula SHA-256, ignora duplicatas, processa o áudio, cria o vetor multimodal e persiste o caso. Ao término do lote, tenta treinar uma única vez; assim, evita retreinos repetidos para cada arquivo.
+`alimentar_sistema_em_lote()` valida todos os blocos da interface antes do processamento. Cada caso inclui o modelo da máquina, o componente prioritário e as possíveis causas observadas. Para cada arquivo, o sistema calcula SHA-256, ignora duplicatas, processa o áudio, cria o vetor multimodal e persiste o caso. Ao término do lote, tenta treinar uma única vez; assim, evita retreinos repetidos para cada arquivo.
 
 Um arquivo inválido não encerra o lote: o resultado de cada item é marcado como `ok`, `duplicado` ou `erro`.
 
 ### 3.2 Diagnóstico
 
-`gerar_diagnostico()` só é habilitado com um modelo salvo. O arquivo desconhecido percorre o mesmo pipeline de extração, e o vetor resultante é enviado a `predict_proba()`. A confirmação do operador chama `absorver_caso()`, que grava o novo exemplo e retreina se a base estiver apta.
+`gerar_diagnostico()` só é habilitado com um modelo salvo. O arquivo desconhecido percorre o mesmo pipeline de extração, e o vetor resultante é enviado a `predict_proba()`. O operador informa o modelo da máquina e recebe um relatório com hipótese, nível de confiança, peças/conjuntos prioritários e possíveis origens. As recomendações vêm primeiro de casos com o mesmo problema e modelo; na falta deles, o sistema informa que usou uma referência geral ou que não há referência cadastrada. O modo operador não altera a base.
 
 ### 3.3 Exclusão e backup
 
@@ -94,7 +94,7 @@ A probabilidade retornada é relativa às classes conhecidas pelo modelo; não c
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `dataset_master.csv` | Metadados do caso, hash SHA-256, origem, caminhos relativos e vetor multimodal. |
+| `dataset_master.csv` | Metadados do caso, modelo da máquina, componente recomendado, causas, hash SHA-256, origem, caminhos relativos e vetor multimodal. |
 | `audios_conhecidos/` | WAV PCM 16 bits processado, no padrão `ROTULO_ID.wav`. |
 | `textos_conhecidos/` | Laudo normalizado, no padrão `ROTULO_ID.txt`. |
 | `modelos/modelo_lgbm.joblib` | Classificador treinado. |
@@ -125,7 +125,7 @@ O `iniciar.bat` para Windows:
 ## 10. Segurança, privacidade e manutenção
 
 - O servidor escuta somente em `localhost`; não exponha em rede sem autenticação e revisão de segurança.
-- A aba administrativa não possui controle de acesso próprio. A proteção depende da conta do sistema operacional e das permissões da pasta.
+- A aba administrativa exige senha. Configure `admin_password` em `.streamlit/secrets.toml` (a partir do arquivo de exemplo) ou `DIAGNOSTICO_ADMIN_PASSWORD`; nunca versione a senha real.
 - Dados de diagnóstico podem ser sensíveis. Faça backups periódicos e proteja os arquivos ZIP gerados.
 - O Demucs pode baixar o modelo na primeira análise com fala. Após isso, é possível operar offline; para impedir consultas externas, use `HF_HUB_OFFLINE=1` depois de preencher o cache.
 - Antes de atualizar `app.py` ou dependências, faça backup dos quatro itens de dados. Não copie `.venv` entre computadores.

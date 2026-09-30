@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import hmac
 import importlib.util
 import io
 import json
@@ -770,7 +771,10 @@ COLUNAS_META: List[str] = ["UUID", "rotulo", "audio_path", "text_path"]
 #   arquivo_original -> nome do arquivo enviado na interface
 #   origem           -> "admin" (aba Alimentação) ou "diagnostico" (confirmação do operador)
 #   criado_em        -> data/hora do cadastro
-COLUNAS_META_EXTRAS: List[str] = ["hash_video", "arquivo_original", "origem", "criado_em"]
+COLUNAS_META_EXTRAS: List[str] = [
+    "hash_video", "arquivo_original", "origem", "criado_em",
+    "modelo_maquina", "componente_recomendado", "causas_provaveis",
+]
 
 
 def gerar_uuid_curto(df_existente: Optional[pd.DataFrame] = None) -> str:
@@ -1306,6 +1310,9 @@ class EntradaCaso:
     arquivos: List[Any]  # UploadedFile(s) do Streamlit (ou qualquer objeto com .name e .getvalue())
     texto: str
     rotulo: str
+    modelo_maquina: str
+    componente_recomendado: str
+    causas_provaveis: str
 
 
 @dataclass
@@ -1314,6 +1321,7 @@ class ItemLote:
     numero_caso: int
     arquivo: str
     rotulo: str
+    modelo_maquina: str
     total_no_caso: int
     status: str = "pendente"  # "ok" | "duplicado" | "erro"
     registro_id: Optional[str] = None
@@ -1371,6 +1379,12 @@ def validar_entradas_admin(entradas: Sequence[EntradaCaso]) -> List[str]:
             faltas.append("preencha o texto do laudo")
         if not limpar_texto(entrada.rotulo):
             faltas.append("informe o nome exato do problema (rótulo)")
+        if not limpar_texto(entrada.modelo_maquina):
+            faltas.append("informe o modelo da máquina")
+        if not limpar_texto(entrada.componente_recomendado):
+            faltas.append("informe a peça ou conjunto prioritário para inspeção")
+        if not limpar_texto(entrada.causas_provaveis):
+            faltas.append("informe as possíveis causas/origens do problema")
         if faltas:
             problemas.append(f"Caso {entrada.numero}: {', '.join(faltas)}.")
     return problemas
@@ -1399,15 +1413,17 @@ def alimentar_sistema_em_lote(
             nome = str(getattr(arquivo, "name", f"arquivo_{k + 1}"))
             item = ItemLote(
                 caso_id=entrada.caso_id, numero_caso=entrada.numero, arquivo=nome,
-                rotulo=limpar_texto(entrada.rotulo), total_no_caso=len(entrada.arquivos),
+                rotulo=limpar_texto(entrada.rotulo), modelo_maquina=limpar_texto(entrada.modelo_maquina),
+                total_no_caso=len(entrada.arquivos),
             )
 
             def etapa(texto: str, fracao: float, _k: int = k, _nome: str = nome) -> None:
                 progresso((_k + fracao) / total, f"Vídeo {_k + 1} de {len(tarefas)} · {_nome} — {texto}...")
 
             try:
-                if not (limpar_texto(entrada.texto) and item.rotulo):
-                    raise PipelineError("o caso precisa de laudo e rótulo.")
+                if not (limpar_texto(entrada.texto) and item.rotulo and item.modelo_maquina
+                        and limpar_texto(entrada.componente_recomendado) and limpar_texto(entrada.causas_provaveis)):
+                    raise PipelineError("o caso precisa de laudo, rótulo, modelo da máquina, peça e possíveis causas.")
                 video_bytes = arquivo.getvalue()
                 hash_video = calcular_hash_video(video_bytes)
                 if hash_video in hashes:
@@ -1430,7 +1446,12 @@ def alimentar_sistema_em_lote(
                     df_master, registro_id = _persistir_novo_caso(
                         df_master, item.rotulo, resultado_audio.features_audio, entrada.texto,
                         resultado_audio.wav_bytes, dim_texto,
-                        extras={"hash_video": hash_video, "arquivo_original": nome, "origem": "admin"},
+                        extras={
+                            "hash_video": hash_video, "arquivo_original": nome, "origem": "admin",
+                            "modelo_maquina": item.modelo_maquina,
+                            "componente_recomendado": limpar_texto(entrada.componente_recomendado),
+                            "causas_provaveis": limpar_texto(entrada.causas_provaveis),
+                        },
                     )
                     hashes[hash_video] = (registro_id, item.rotulo)
                     item.registro_id = registro_id
@@ -1511,6 +1532,7 @@ def gerar_diagnostico(
     video_bytes: bytes,
     nome_arquivo: str,
     texto_laudo: str,
+    modelo_maquina: str,
     estado_modelo: Optional[EstadoModelo],
     etapa: Etapa = _sem_progresso,
 ) -> Dict[str, Any]:
@@ -1526,6 +1548,8 @@ def gerar_diagnostico(
         raise PipelineError("envie um vídeo desconhecido antes de gerar o diagnóstico.")
     if not limpar_texto(texto_laudo):
         raise PipelineError("o texto do laudo não pode estar vazio.")
+    if not limpar_texto(modelo_maquina):
+        raise PipelineError("informe o modelo da máquina para gerar um relatório direcionado.")
 
     with _trava_processamento():
         resultado_audio = processar_video_e_extrair(video_bytes, nome_arquivo, etapa)
@@ -1538,6 +1562,7 @@ def gerar_diagnostico(
         "probs": probs,
         "features_audio": resultado_audio.features_audio.tolist(),
         "texto_laudo": texto_laudo,
+        "modelo_maquina": limpar_texto(modelo_maquina),
         "wav_bytes": resultado_audio.wav_bytes,
         "hash_video": resultado_audio.hash_video,
         "nome_arquivo": nome_arquivo,
@@ -1546,6 +1571,111 @@ def gerar_diagnostico(
         "demucs_aplicado": resultado_audio.demucs_aplicado,
         "avisos": list(resultado_audio.avisos),
     }
+
+
+def obter_referencias_relatorio(rotulo: str, modelo_maquina: str) -> Dict[str, Any]:
+    """Busca recomendações registradas pelos administradores para o relatório.
+
+    Primeiro usa casos do mesmo problema e modelo; se a base ainda não possuir
+    essa combinação, usa o histórico do problema e sinaliza a menor precisão.
+    """
+    dim_texto = obter_dimensao_vetor_texto()
+    df = carregar_ou_inicializar_dataset(dim_texto)
+    if df.empty:
+        return {"casos": 0, "especifico_modelo": False, "pecas": [], "causas": []}
+
+    mesmos_problema = df[df["rotulo"].astype(str) == str(rotulo)]
+    mesma_maquina = mesmos_problema[
+        mesmos_problema["modelo_maquina"].map(_chave_rotulo) == _chave_rotulo(modelo_maquina)
+    ]
+    referencias = mesma_maquina if not mesma_maquina.empty else mesmos_problema
+
+    def valores_unicos(coluna: str) -> List[str]:
+        valores = [limpar_texto(v) for v in referencias.get(coluna, pd.Series(dtype=str)).tolist()]
+        return list(dict.fromkeys(v for v in valores if v))
+
+    return {
+        "casos": int(len(referencias)),
+        "especifico_modelo": not mesma_maquina.empty,
+        "pecas": valores_unicos("componente_recomendado"),
+        "causas": valores_unicos("causas_provaveis"),
+    }
+
+
+def interpretar_confianca(probabilidade: float, segunda_probabilidade: float) -> Tuple[str, str]:
+    if probabilidade >= 0.80:
+        return "Indicação consistente", "Confirme a indicação com inspeção física antes de intervir."
+    if probabilidade >= 0.50 and probabilidade - segunda_probabilidade >= 0.10:
+        return "Indicação moderada", "Há uma hipótese principal, mas a inspeção deve comparar alternativas próximas."
+    return "Indicação inconclusiva", "Verifique o equipamento antes de decidir; pode haver uma falha ainda não cadastrada."
+
+
+def render_relatorio_diagnostico(resultado: Dict[str, Any]) -> None:
+    """Apresenta um relatório operacional baseado na probabilidade e no histórico."""
+    ordenadas = sorted(resultado["probs"].items(), key=lambda item: item[1], reverse=True)
+    if not ordenadas:
+        st.warning("O modelo não retornou hipóteses para este diagnóstico.")
+        return
+    rotulo, probabilidade = ordenadas[0]
+    segunda_probabilidade = ordenadas[1][1] if len(ordenadas) > 1 else 0.0
+    nivel, orientacao = interpretar_confianca(probabilidade, segunda_probabilidade)
+    referencias = obter_referencias_relatorio(rotulo, resultado["modelo_maquina"])
+
+    with st.container(border=True):
+        st.markdown("### Relatório de diagnóstico")
+        st.caption(f"Modelo informado: **{_md(resultado['modelo_maquina'])}**")
+        st.markdown(f"**Hipótese principal:** {_md(rotulo)} · **{probabilidade:.0%}** de confiança interna")
+        st.info(f"**{nivel}.** {orientacao}")
+
+        if referencias["casos"] and referencias["especifico_modelo"]:
+            st.success(
+                f"A recomendação abaixo considera {referencias['casos']} caso(s) histórico(s) "
+                "do mesmo problema e modelo de máquina."
+            )
+        elif referencias["casos"]:
+            st.warning(
+                f"Há {referencias['casos']} caso(s) histórico(s) para este problema, mas nenhum para o "
+                "modelo informado. Use as recomendações como referência geral."
+            )
+        else:
+            st.warning(
+                "Ainda não há referência técnica cadastrada para esta hipótese. Registre o caso na área "
+                "administrativa após a confirmação para enriquecer relatórios futuros."
+            )
+
+        st.markdown("**Peças ou conjuntos prioritários para inspeção**")
+        if referencias["pecas"]:
+            for peca in referencias["pecas"]:
+                st.markdown(f"- {_md(peca)}")
+        else:
+            st.caption("Nenhuma peça ou conjunto foi associado a esta hipótese na base de conhecimento.")
+
+        st.markdown("**Possíveis origens do problema**")
+        if referencias["causas"]:
+            for causa in referencias["causas"]:
+                st.markdown(f"- {_md(causa)}")
+        else:
+            st.caption("Nenhuma causa foi registrada para esta hipótese. Faça a inspeção seguindo o procedimento técnico da máquina.")
+
+        st.markdown("**Próximos passos sugeridos**")
+        st.markdown(
+            "1. Inspecione os componentes listados e compare com o laudo e o áudio.\n"
+            "2. Verifique condições de montagem, desgaste, contaminação, obstrução e operação.\n"
+            "3. Confirme a falha antes de substituir peças ou liberar o equipamento."
+        )
+
+    linhas = [
+        "RELATÓRIO DE DIAGNÓSTICO ACÚSTICO", "",
+        f"Modelo da máquina: {resultado['modelo_maquina']}",
+        f"Hipótese principal: {rotulo}", f"Confiança interna: {probabilidade:.0%}",
+        f"Classificação: {nivel}", "", "Peças/conjuntos prioritários:",
+        *(referencias["pecas"] or ["Sem referência cadastrada."]), "", "Possíveis origens:",
+        *(referencias["causas"] or ["Sem referência cadastrada."]), "", "Importante: confirme o resultado por inspeção técnica.",
+    ]
+    st.download_button(
+        "Baixar relatório (.txt)", data="\n".join(linhas),
+        file_name="relatorio_diagnostico.txt", mime="text/plain", width="stretch",
+    )
 
 
 def excluir_casos(uuids: Sequence[str]) -> Dict[str, Any]:
@@ -1722,6 +1852,7 @@ def inicializar_sessao() -> None:
         "admin_parcial": None,          # itens já processados de um envio em andamento
         "admin_toast_pendente": False,
         "admin_tabela_geracao": 0,
+        "admin_autenticado": False,
         # Aba Diagnóstico
         "diag_resultado": None,
         "diag_geracao": 0,
@@ -1730,6 +1861,49 @@ def inicializar_sessao() -> None:
     }
     for chave, valor in padroes.items():
         st.session_state.setdefault(chave, valor)
+
+
+def obter_senha_admin() -> str:
+    """Lê a senha fora do repositório.
+
+    Prioridade: ``.streamlit/secrets.toml`` (admin_password) e, como alternativa
+    para implantação, a variável de ambiente ``DIAGNOSTICO_ADMIN_PASSWORD``.
+    """
+    try:
+        senha = str(st.secrets.get("admin_password", ""))
+    except Exception:
+        senha = ""
+    return senha or os.getenv("DIAGNOSTICO_ADMIN_PASSWORD", "")
+
+
+def render_acesso_admin() -> bool:
+    """Exibe a autenticação antes de qualquer controle de alteração da base."""
+    if st.session_state.get("admin_autenticado"):
+        if st.button("Sair da área administrativa", key="admin_sair"):
+            st.session_state["admin_autenticado"] = False
+            st.rerun()
+        return True
+
+    st.subheader("Área administrativa")
+    senha_configurada = obter_senha_admin()
+    if not senha_configurada:
+        st.error(
+            "A senha administrativa ainda não foi configurada. Um responsável deve criar "
+            "`.streamlit/secrets.toml` a partir de `.streamlit/secrets.example.toml` "
+            "ou definir a variável `DIAGNOSTICO_ADMIN_PASSWORD`."
+        )
+        return False
+
+    st.caption("Apenas funcionários autorizados podem cadastrar, excluir ou treinar dados.")
+    with st.form("form_acesso_admin", clear_on_submit=True):
+        senha_informada = st.text_input("Senha administrativa", type="password")
+        entrar = st.form_submit_button("Acessar administração")
+    if entrar:
+        if hmac.compare_digest(senha_informada, senha_configurada):
+            st.session_state["admin_autenticado"] = True
+            st.rerun()
+        st.error("Senha incorreta.")
+    return False
 
 
 def _flash(area: str, tipo: str, texto: str, toast: Optional[str] = None) -> None:
@@ -1764,7 +1938,10 @@ def _adicionar_caso_admin() -> None:
 
 
 def _limpar_widgets_caso(caso_id: str) -> None:
-    for prefixo in ("admin_video_", "admin_texto_", "admin_rotulo_", "admin_remover_"):
+    for prefixo in (
+        "admin_video_", "admin_texto_", "admin_rotulo_", "admin_modelo_",
+        "admin_componente_", "admin_causas_", "admin_remover_",
+    ):
         st.session_state.pop(f"{prefixo}{caso_id}", None)
     st.session_state["admin_erros_casos"].pop(caso_id, None)
 
@@ -2045,6 +2222,8 @@ def render_painel_base(status: StatusBase, estado_modelo: Optional[EstadoModelo]
 
 
 def render_tab_admin(status: StatusBase, estado_modelo: Optional[EstadoModelo]) -> None:
+    if not render_acesso_admin():
+        return
     _recuperar_envio_interrompido()
 
     st.subheader("Alimentação do Sistema (Admin)")
@@ -2099,6 +2278,18 @@ def render_tab_admin(status: StatusBase, estado_modelo: Optional[EstadoModelo]) 
             rotulo = st.text_input(
                 "Nome exato do problema (rótulo)", key=f"admin_rotulo_{caso_id}"
             )
+            modelo_maquina = st.text_input(
+                "Modelo da máquina/equipamento", key=f"admin_modelo_{caso_id}",
+                help="Ex.: modelo comercial, família ou código interno da máquina.",
+            )
+            componente_recomendado = st.text_input(
+                "Peça ou conjunto prioritário para inspeção", key=f"admin_componente_{caso_id}",
+                help="Ex.: rolamento do motor, correia de transmissão, conjunto da bomba.",
+            )
+            causas_provaveis = st.text_area(
+                "Possíveis causas/origens confirmadas", key=f"admin_causas_{caso_id}", height=88,
+                help="Registre causas observadas neste tipo de falha: desgaste, desalinhamento, obstrução etc.",
+            )
             rotulo_limpo = limpar_texto(rotulo)
             if rotulo_limpo:
                 canonico = normalizar_rotulo(rotulo_limpo, rotulos_existentes)
@@ -2108,7 +2299,8 @@ def render_tab_admin(status: StatusBase, estado_modelo: Optional[EstadoModelo]) 
                     st.caption("Problema novo — será criado na base.")
             entradas.append(EntradaCaso(
                 caso_id=caso_id, numero=numero, arquivos=list(arquivos or []),
-                texto=texto_laudo or "", rotulo=rotulo or "",
+                texto=texto_laudo or "", rotulo=rotulo or "", modelo_maquina=modelo_maquina or "",
+                componente_recomendado=componente_recomendado or "", causas_provaveis=causas_provaveis or "",
             ))
 
     st.button("+ Novo caso", key="admin_novo_caso", on_click=_adicionar_caso_admin)
@@ -2116,9 +2308,12 @@ def render_tab_admin(status: StatusBase, estado_modelo: Optional[EstadoModelo]) 
     st.markdown("---")
 
     if st.button("Alimentar Sistema", type="primary", width="stretch", key="admin_alimentar"):
-        preenchidas = [e for e in entradas if e.arquivos or limpar_texto(e.texto) or limpar_texto(e.rotulo)]
+        preenchidas = [
+            e for e in entradas if e.arquivos or limpar_texto(e.texto) or limpar_texto(e.rotulo)
+            or limpar_texto(e.modelo_maquina) or limpar_texto(e.componente_recomendado) or limpar_texto(e.causas_provaveis)
+        ]
         if not preenchidas:
-            st.warning("Preencha ao menos um caso (vídeo + texto + rótulo) antes de alimentar o sistema.")
+            st.warning("Preencha ao menos um caso antes de alimentar o sistema.")
         elif problemas := validar_entradas_admin(preenchidas):
             st.warning("Complete os campos antes de alimentar o sistema:\n\n"
                        + "\n\n".join(f"• {p}" for p in problemas))
@@ -2196,6 +2391,10 @@ def render_tab_diagnostico(estado_modelo: Optional[EstadoModelo], status: Status
             arquivo_video = st.file_uploader(
                 "Vídeo desconhecido", type=TIPOS_ACEITOS, key=f"upload_diagnostico_{geracao}"
             )
+            modelo_maquina = st.text_input(
+                "Modelo da máquina/equipamento", key=f"modelo_diagnostico_{geracao}",
+                help="O relatório busca referências cadastradas para este modelo.",
+            )
             texto_laudo = st.text_area(
                 "Texto do laudo do respectivo vídeo", key=f"texto_diagnostico_{geracao}", height=120
             )
@@ -2209,11 +2408,14 @@ def render_tab_diagnostico(estado_modelo: Optional[EstadoModelo], status: Status
         if not limpar_texto(texto_laudo):
             st.warning("O texto do laudo não pode estar vazio.")
             return
+        if not limpar_texto(modelo_maquina):
+            st.warning("Informe o modelo da máquina para receber recomendações direcionadas.")
+            return
 
         barra = st.progress(0.0, text="Preparando...")
         try:
             novo = gerar_diagnostico(
-                arquivo_video.getvalue(), arquivo_video.name, texto_laudo, estado_modelo,
+                arquivo_video.getvalue(), arquivo_video.name, texto_laudo, modelo_maquina, estado_modelo,
                 etapa=lambda texto, fracao: barra.progress(min(fracao, 1.0), text=_md(f"{texto}...")),
             )
         except PipelineError as exc:
@@ -2242,41 +2444,11 @@ def render_tab_diagnostico(estado_modelo: Optional[EstadoModelo], status: Status
     for aviso in resultado.get("avisos") or []:
         st.caption(f"↳ Atenção: {_md(aviso)}")
 
-    st.markdown("**Clique no problema mais provável ou envie outro para treinar a IA.**")
-
-    probs_relevantes = [
-        (rotulo, p) for rotulo, p in sorted(probs.items(), key=lambda kv: kv[1], reverse=True) if p > 0.01
-    ]
-    if not probs_relevantes:
-        st.warning("Nenhuma classe atingiu probabilidade acima de 1%. Use o campo 'Outro problema' abaixo.")
-
-    rotulo_escolhido: Optional[str] = None
-    for i, (rotulo, prob) in enumerate(probs_relevantes):
-        if st.button(f"{rotulo} ({prob:.0%})", key=f"botao_prob_{geracao}_{i}", width="stretch"):
-            rotulo_escolhido = rotulo
+    render_relatorio_diagnostico(resultado)
     st.caption(
-        "A porcentagem é a confiança interna do modelo, não uma certeza — confirme com a inspeção do equipamento."
+        "O modo operador é somente consulta: a confirmação, o cadastro e o treinamento da base são feitos na área administrativa."
     )
-
-    st.markdown("---")
-    col_txt, col_btn = st.columns([3, 1], vertical_alignment="bottom")
-    with col_txt:
-        outro_rotulo = st.text_input(
-            "Outro problema", key=f"input_outro_rotulo_{geracao}", placeholder="Digite o problema aqui"
-        )
-    with col_btn:
-        enviar_outro = st.button("Treinar Nova Classe", key=f"botao_outro_rotulo_{geracao}", width="stretch")
-
-    if enviar_outro:
-        if not limpar_texto(outro_rotulo):
-            st.warning("Digite o nome do problema antes de treinar a nova classe.")
-        else:
-            rotulo_escolhido = limpar_texto(outro_rotulo)
-
-    st.button("Descartar e analisar outro vídeo", key=f"diag_descartar_{geracao}", on_click=_descartar_diagnostico)
-
-    if rotulo_escolhido:
-        _absorver_diagnostico(rotulo_escolhido, resultado)
+    st.button("Analisar outro vídeo", key=f"diag_descartar_{geracao}", on_click=_descartar_diagnostico)
 
 
 # -------------------------------------------------------------------- Sidebar
