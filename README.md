@@ -77,6 +77,10 @@ Como alternativa de implantação, defina a variável de ambiente `DIAGNOSTICO_A
 - [Guia técnico de instalação e operação](Guia_Tecnico_Diagnostico_Acustico_Imagens_por_Secao-1.pdf) — manual para TI, administradores e operadores.
 - [Instruções resumidas](LEIA-ME.txt) — instalação e uso básico.
 
+## MVP mobile
+
+O aplicativo Flutter para técnicos está em [`mobile_app/`](mobile_app/). Ele oferece um fluxo mobile de consulta: modelo da máquina, envio de evidência sonora, laudo, relatório de peças prioritárias, possíveis causas e histórico da sessão. O MVP não expõe funções administrativas ou de treinamento.
+
 ## Estrutura do repositório
 
 ```text

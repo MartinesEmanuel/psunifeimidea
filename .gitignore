@@ -11,3 +11,9 @@ dataset_master.csv
 
 # Artefatos locais do Streamlit
 .streamlit/secrets.toml
+
+# Artefatos Flutter
+mobile_app/.dart_tool/
+mobile_app/build/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
