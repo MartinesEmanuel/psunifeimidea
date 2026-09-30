@@ -1,0 +1,13 @@
+# Ambiente Python e cache
+.venv/
+__pycache__/
+*.py[cod]
+
+# Arquivos gerados pelo uso do aplicativo
+audios_conhecidos/
+textos_conhecidos/
+modelos/
+dataset_master.csv
+
+# Artefatos locais do Streamlit
+.streamlit/secrets.toml
