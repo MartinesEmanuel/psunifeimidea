@@ -1,0 +1,32 @@
+﻿DIAGNÓSTICO ACÚSTICO DE FALHAS MECÂNICAS — como instalar e abrir
+=================================================================
+
+1. EXTRAIA O .ZIP
+   Clique com o botão direito no arquivo .zip e escolha "Extrair tudo...".
+   Não rode o programa de dentro do .zip.
+   Dica: prefira um caminho curto, por exemplo C:\DiagnosticoAcustico
+   (algumas pastas do OneDrive de empresa têm caminhos compridos demais).
+
+2. DÊ DOIS CLIQUES EM "iniciar.bat"
+   - Na primeira vez ele instala sozinho tudo o que faltar (inclusive o
+     Python, se o computador não tiver). Precisa de internet e pode levar
+     de 5 a 20 minutos. É normal a janela preta ficar mostrando textos.
+   - Se aparecer um aviso de segurança do Windows, clique em "Executar"
+     (ou em "Mais informações" e depois "Executar assim mesmo").
+   - Nas próximas vezes ele abre em poucos segundos, mesmo sem internet.
+
+3. USE O PROGRAMA
+   Ele abre sozinho no navegador, no endereço http://localhost:8501
+   Para encerrar, feche a janela preta do iniciar.bat.
+
+OBSERVAÇÕES
+   - A IA começa vazia. Cadastre os vídeos na aba "Alimentação (Admin)":
+     ela treina quando houver pelo menos 2 problemas diferentes com
+     10 vídeos cada.
+   - Na primeira vez que um vídeo com fala humana for processado, o
+     programa baixa ~80 MB (modelo que remove a voz). Precisa de internet
+     nesse momento.
+   - Tudo o que a IA aprende fica nesta pasta (dataset_master.csv,
+     audios_conhecidos, textos_conhecidos e modelos). Para levar para
+     outro computador, use o botão "Baixar backup (.zip)" na barra
+     lateral e extraia o backup dentro da pasta do programa no outro PC.

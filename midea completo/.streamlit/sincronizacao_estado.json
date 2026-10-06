@@ -1,0 +1,13 @@
+{
+  "ultima_tentativa": "2026-10-05T21:10:39-03:00",
+  "ultima_sincronizacao": "2026-10-05T21:10:39-03:00",
+  "ultimo_erro": null,
+  "ultimo_resumo": {
+    "recebidos": 0,
+    "analisados": 0,
+    "analises_enviadas": 0,
+    "respostas_enviadas": 0,
+    "publicacoes_enviadas": 0,
+    "avisos": []
+  }
+}

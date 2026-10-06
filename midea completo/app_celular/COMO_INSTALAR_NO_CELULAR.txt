@@ -1,0 +1,43 @@
+COMO INSTALAR O APP NO CELULAR (Android)
+=========================================
+
+1. PASSAR O ARQUIVO PARA O CELULAR
+   Mande o arquivo DiagnosticoAcustico-app-v1.0.0.apk para o celular
+   (cabo USB, Google Drive, e-mail para você mesmo...).
+   Obs.: o WhatsApp às vezes bloqueia arquivos .apk; prefira outro jeito.
+
+2. INSTALAR
+   - No celular, toque no arquivo.
+   - O Android vai avisar que o app não vem da Play Store. Toque em
+     "Configurações" e ligue "Permitir desta fonte" (só para o app que você
+     usou para abrir o arquivo: Arquivos, Drive, Chrome...).
+   - Volte e toque em "Instalar". Se aparecer o aviso do Play Protect,
+     toque em "Mais detalhes" -> "Instalar mesmo assim".
+   - Precisa de Android 7 ou mais novo.
+
+3. USAR SEM INTERNET (já funciona assim)
+   - Abra o app, leia o guia e toque em "Começar".
+   - "Novo diagnóstico": digite o modelo da máquina, o laudo e grave.
+     Na primeira gravação, o Android pede permissão para o microfone: permita.
+   - Enquanto o celular não receber a IA do site, ele grava e guarda os
+     casos, mas ainda não mostra a porcentagem dos defeitos.
+
+4. LIGAR À CENTRAL (precisa de internet só nessa hora)
+   - Antes, prepare a caixa postal (veja nuvem/COMO_CONFIGURAR.txt).
+   - No site (modo administrador): "Celulares e sincronização" ->
+     "Gerar pacote para os celulares" e depois "Sincronizar agora".
+   - No app: engrenagem (Configurações) -> cole o código de conexão
+     (DA1....) -> entre com o e-mail e a senha do técnico.
+   - Toque em "Sincronizar agora" na tela inicial: o celular recebe a IA,
+     os textos dos defeitos e as peças, e envia os casos guardados.
+   - Depois disso o app sincroniza sozinho sempre que abre com internet.
+
+ATUALIZAR O APP NO FUTURO
+   Instale o .apk novo por cima do antigo. Os casos guardados continuam.
+   (Só funciona se o app novo for assinado com a mesma chave; veja abaixo.)
+
+PARA QUEM MANTÉM O APP
+   O código do app está em C:\Users\pedro\dev\diagnostico_app
+   Guarde com cuidado (e em backup) estes 2 arquivos:
+     android\key.properties  e  android\app\chave-release.jks
+   Sem eles não dá para lançar versões novas que instalem por cima desta.

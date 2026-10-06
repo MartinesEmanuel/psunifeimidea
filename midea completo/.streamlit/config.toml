@@ -1,0 +1,16 @@
+[server]
+maxUploadSize = 10240
+maxMessageSize = 10240
+# Só este computador acessa o app (a aba Admin não tem senha) e o Windows
+# não mostra o alerta do Firewall. Para abrir de outro aparelho da rede,
+# troque para "0.0.0.0".
+address = "localhost"
+# Não pergunta e-mail no terminal na primeira execução.
+showEmailPrompt = false
+
+[theme]
+base = "light"
+primaryColor = "#c8102e"
+
+[browser]
+gatherUsageStats = false
