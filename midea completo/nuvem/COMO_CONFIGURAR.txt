@@ -1,0 +1,82 @@
+COMO PREPARAR A CAIXA POSTAL NA INTERNET (Supabase)
+===================================================
+
+Feito uma única vez, pelo administrador. Leva uns 15 minutos.
+
+O QUE É
+  Um lugar na internet onde o site e os celulares deixam e buscam dados,
+  como uma caixa de correio. O site e o app continuam funcionando sem
+  internet; a caixa postal só é usada na hora da troca.
+
+1. CRIAR A CONTA
+   - Acesse https://supabase.com e clique em "Start your project".
+   - Entre com um e-mail (de preferência um e-mail do projeto, não pessoal).
+
+2. CRIAR O PROJETO
+   - Clique em "New project".
+   - Nome: diagnostico-acustico
+   - Crie uma senha para o banco de dados e guarde-a num lugar seguro.
+   - Região: South America (São Paulo).
+   - Espere 1 ou 2 minutos até o projeto ficar pronto.
+
+3. PREPARAR O PROJETO
+   - No menu da esquerda, abra "SQL Editor" e clique em "New query".
+   - Abra o arquivo supabase_configuracao.sql (nesta mesma pasta) no Bloco
+     de Notas, copie TUDO, cole no Supabase e clique em "Run".
+   - Deve aparecer "Success". Pode rodar de novo sem problema.
+
+4. NÃO DEIXAR QUALQUER UM CRIAR CONTA
+   - No menu da esquerda: "Authentication" -> "Sign In / Providers".
+   - Desligue a opção "Allow new users to sign up" e salve.
+     Assim, só o administrador cria as contas dos técnicos (pelo site).
+
+5. COPIAR O ENDEREÇO E AS CHAVES
+   - Engrenagem "Project Settings" -> "API" (ou "Data API" / "API Keys").
+   - Copie três coisas:
+       a) Project URL (começa com https://)
+       b) a chave pública: "anon" ou "publishable"
+       c) a chave secreta: "service_role" ou "secret"
+
+6. COLAR NO SITE
+   - No site, entre no modo administrador e vá em:
+     Alimentação (Admin) -> Celulares e sincronização -> Configuração da caixa postal
+   - Cole as três informações e clique em "Salvar e testar a conexão".
+
+7. CRIAR A CONTA DE CADA TÉCNICO
+   - Na mesma aba, em "Técnicos (contas do app)": nome, e-mail e uma senha
+     provisória. Passe o e-mail e a senha ao técnico.
+
+8. LIGAR O CELULAR À CENTRAL
+   - Na mesma aba aparece o "Código de conexão para os celulares" (começa
+     com DA1.). Mande esse código para o técnico (ele não é secreto: leva só
+     o endereço e a chave pública).
+   - No app: Configurações -> 1. Conexão com a Central -> cole o código ->
+     2. Sua conta -> e-mail e senha criados no passo 7.
+
+9. OUTROS COMPUTADORES DO SITE (base compartilhada)
+   O que for alimentado em qualquer computador chega a todos, sem backup:
+   cada sincronização troca os casos, as exclusões e os textos dos
+   defeitos, e cada computador treina a IA com a base completa.
+   - Se o seu Supabase já estava preparado, rode de novo o
+     supabase_configuracao.sql (passo 3): ele cria as tabelas da base
+     compartilhada. Pode rodar de novo sem problema.
+   - No outro computador, instale o site com o DiagnosticoAcustico_instalador_novo.zip
+     (está na pasta do programa) e siga o LEIA-ME.txt dele.
+   - Lá, em "Configuração da caixa postal", cole o endereço do projeto e a
+     chave de serviço e deixe DESMARCADO "Este computador é a Central".
+   - A Central (o computador que recebe os casos dos celulares e envia a IA
+     para eles) é uma só: deixe essa opção marcada só nela.
+
+CUIDADOS
+  - A chave secreta (service_role / secret) dá acesso total à caixa postal.
+    Ela fica só nos computadores do site (a Central e os outros que
+    alimentam a base): não coloque no app, não poste em lugar nenhum e
+    entregue só a quem alimenta o sistema. Ela não vai no backup do site.
+  - No plano gratuito, o Supabase pausa projetos parados por cerca de uma
+    semana. Se a sincronização parar depois de um tempo sem uso, entre no
+    painel do Supabase e clique em "Restore project" (ou use um plano pago).
+  - Os áudios podem ter vozes de pessoas. Combine com a Midea e a UNIFEI o
+    uso desse serviço (LGPD) antes de colocar os técnicos para usar.
+  - A caixa postal guarda os arquivos só durante a entrega: assim que o site
+    baixa um caso, o arquivo é apagado de lá. A base oficial fica no
+    computador da Central (faça os backups normalmente).

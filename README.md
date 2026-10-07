@@ -12,6 +12,19 @@ Aplicação local para apoiar a identificação de falhas mecânicas a partir de
 - **Processamento local:** vídeos, áudios, laudos e modelo ficam no computador; a interface padrão atende somente em `localhost`.
 - **Backup:** permite baixar a base, os áudios, os laudos e o modelo treinado em um único arquivo `.zip`.
 
+## Versão atual com sincronização entre computadores
+
+A versão atual está em [`midea completo/`](midea%20completo/), com base compartilhada entre PCs, pacotes para Android e importação de backups. Os arquivos da raiz são a versão anterior.
+
+Para executar a versão atual, use as instruções de instalação abaixo com o `requirements.txt` dessa pasta e inicie o Streamlit dentro dela:
+
+```bash
+cd "midea completo"
+../.venv/bin/python -m streamlit run app.py
+```
+
+Configure a conexão em **Alimentação (Admin) → Celulares e sincronização**. Marque **Este computador é a Central** somente no PC responsável pelos celulares; os demais PCs trocam a base sem essa opção. A preparação do Supabase está em [`nuvem/COMO_CONFIGURAR.txt`](midea%20completo/nuvem/COMO_CONFIGURAR.txt). Senhas, chaves, dados e modelos locais não são incluídos no Git.
+
 ## Início rápido — Windows
 
 1. Baixe ou clone o projeto e mantenha-o em uma pasta local de caminho curto, por exemplo `C:\DiagnosticoAcustico`.
