@@ -1,0 +1,30 @@
+[
+  {
+    "versao": 1,
+    "criado_em": "2026-10-05T21:57:55",
+    "arquivo": "pacote_v0001.zip",
+    "sha256": "fdc64340e30fc3384d56ced0fefdd2e2bc3ecf58aa843db38c10f010dc0f37c6",
+    "tamanho": 1283157,
+    "notas": "backup inicial",
+    "categorias": [
+      "Eletrobomba",
+      "Valvula"
+    ],
+    "acerto_estimado_so_som": 0.7727272727272727,
+    "enviado_em": "2026-10-05T21:57:59"
+  },
+  {
+    "versao": 2,
+    "criado_em": "2026-10-06T22:01:07",
+    "arquivo": "pacote_v0002.zip",
+    "sha256": "dbe3641fa47782e7f4ec18c2710da131bd7c5475f0bdaec60984b943804369cc",
+    "tamanho": 1283147,
+    "notas": "",
+    "categorias": [
+      "Eletrobomba",
+      "Valvula"
+    ],
+    "acerto_estimado_so_som": 0.7727272727272727,
+    "enviado_em": "2026-10-06T22:01:11"
+  }
+]

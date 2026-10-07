@@ -1,0 +1,605 @@
+/* ================================================================
+   Visual do site. As variáveis --... (cores, fontes e logos) são
+   geradas a partir de estilo/tokens.json pelo diagnostico_acustico/estilo.py.
+   ================================================================ */
+
+/* ================================================================
+   VISUAL SYSTEM — white editorial / automotive minimalism
+   Camada exclusivamente visual. Não altera estado, dados ou pipeline.
+   ================================================================ */
+
+@property --edge-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* As cores e fontes (variáveis --...) vêm de estilo/tokens.json. */
+
+html, body, [data-testid="stAppViewContainer"], .stApp {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+html, body, p, div, span, label, input, textarea, button {
+    font-family: var(--fonte-texto);
+}
+
+[data-testid="stAppViewContainer"] > .main {
+    background: var(--bg) !important;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border-bottom: 1px solid rgba(17,17,17,0.06);
+    backdrop-filter: blur(14px);
+}
+
+.main .block-container {
+    max-width: 1080px;
+    padding-top: 3.6rem;
+    padding-bottom: 6rem;
+    padding-left: 2.3rem;
+    padding-right: 2.3rem;
+}
+
+/* Header institucional — logos em uma faixa própria acima do título.
+   Isso elimina qualquer possibilidade de sobreposição com o texto. */
+h1 {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    min-height: 150px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin: 0 auto 1rem auto !important;
+    padding: 92px 0 1.15rem 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--text) !important;
+    font-family: var(--fonte-titulo) !important;
+    font-size: clamp(1.72rem, 2.25vw, 2.08rem) !important;
+    font-weight: 400 !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.026em !important;
+    text-align: center;
+    text-wrap: balance;
+}
+
+h1::before,
+h1::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+}
+
+h1::before {
+    left: 1.5%;
+    width: 132px;
+    height: 64px;
+    background-image: var(--logo-esquerda);
+}
+
+h1::after {
+    right: 1.5%;
+    width: 218px;
+    height: 68px;
+    background-image: var(--logo-direita);
+}
+
+h2, h3 {
+    color: var(--text) !important;
+    font-family: var(--fonte-titulo) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.022em !important;
+}
+
+h2 { font-size: 2.08rem !important; }
+h3 { font-size: 1.52rem !important; }
+
+[data-testid="stCaptionContainer"],
+.stCaption,
+[data-testid="stMarkdownContainer"] p {
+    color: var(--muted) !important;
+    line-height: 1.65 !important;
+}
+
+[data-testid="stMarkdownContainer"] strong {
+    color: var(--text) !important;
+    font-weight: 600 !important;
+}
+
+hr {
+    border: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    margin: 2.2rem 0 !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: #f7f7f5 !important;
+    border-right: 1px solid var(--line) !important;
+}
+
+[data-testid="stSidebar"] > div {
+    background: #f7f7f5 !important;
+}
+
+[data-testid="stSidebar"] h3 {
+    font-family: var(--fonte-texto) !important;
+    font-size: 0.72rem !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    color: var(--text) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #72726d !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 2.2rem;
+    border-bottom: 1px solid var(--line);
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 3.2rem;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #868680 !important;
+    font-size: 0.72rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+    transition: color 180ms ease !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--accent) !important;
+}
+
+.stTabs [data-baseweb="tab"] p {
+    color: inherit !important;
+    font-size: inherit !important;
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--text) !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"] {
+    height: 2px !important;
+    background: var(--accent) !important;
+}
+
+.stTabs [data-baseweb="tab-border"] {
+    background: transparent !important;
+}
+
+/* Cards */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: #ffffff !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: border-color 180ms ease !important;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:focus-within {
+    border-color: var(--line-strong) !important;
+}
+
+/* Widget labels */
+[data-testid="stWidgetLabel"] p,
+label[data-testid="stWidgetLabel"] p,
+.stTextInput label p,
+.stTextArea label p,
+[data-testid="stFileUploader"] label p {
+    color: #242421 !important;
+    font-family: var(--fonte-texto) !important;
+    font-size: 0.70rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.12em !important;
+    line-height: 1.3 !important;
+    text-transform: uppercase !important;
+}
+
+/* Inputs */
+.stTextInput input,
+.stTextArea textarea {
+    color: var(--text) !important;
+    background: #ffffff !important;
+    border: 1px solid #d8d8d3 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    caret-color: var(--accent) !important;
+    font-size: 0.95rem !important;
+    transition: border-color 180ms ease, box-shadow 180ms ease !important;
+}
+
+.stTextInput input { min-height: 3rem !important; }
+
+.stTextArea textarea {
+    padding: 0.95rem 1rem !important;
+    line-height: 1.55 !important;
+}
+
+.stTextInput input:hover,
+.stTextArea textarea:hover {
+    border-color: #b9b9b4 !important;
+}
+
+.stTextInput input:focus,
+.stTextArea textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 1px rgba(200,16,46,0.14) !important;
+}
+
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder {
+    color: #9a9a95 !important;
+}
+
+/* File uploader */
+[data-testid="stFileUploader"] section,
+[data-testid="stFileUploaderDropzone"] {
+    min-height: 68px !important;
+    padding: 0.75rem !important;
+    background: #fbfbfa !important;
+    border: 1px solid #d8d8d3 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: border-color 180ms ease, background-color 180ms ease !important;
+}
+
+[data-testid="stFileUploaderDropzone"]:hover {
+    border-color: #b9b9b4 !important;
+    background: #ffffff !important;
+}
+
+[data-testid="stFileUploaderDropzoneInstructions"] { display: none !important; }
+
+[data-testid="stFileUploaderDropzone"] > svg,
+[data-testid="stFileUploaderDropzone"] button svg,
+[data-testid="stFileUploader"] section > svg {
+    display: none !important;
+}
+
+[data-testid="stFileUploaderDropzone"] button {
+    min-width: 190px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+}
+
+[data-testid="stFileUploader"] small { display: none !important; }
+
+/* ================================================================
+   BOTÕES — borda vermelha "desenhada" progressivamente no hover.
+   O pseudo-elemento usa um conic-gradient mascarado como um anel.
+   Ao passar o mouse, --edge-angle percorre 0 -> 360 graus em 800 ms.
+   ================================================================ */
+.stButton > button,
+.stDownloadButton > button,
+.stFormSubmitButton > button,
+[data-testid="stFileUploaderDropzone"] button {
+    --edge-angle: 0deg;
+    position: relative !important;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 44px !important;
+    padding: 0.72rem 1.15rem !important;
+    color: var(--text) !important;
+    background: #ffffff !important;
+    border: 1px solid #cfcfca !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-family: var(--fonte-texto) !important;
+    font-size: 0.70rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    transition:
+        color 220ms ease,
+        background-color 220ms ease,
+        border-color 220ms ease !important;
+}
+
+.stButton > button::before,
+.stDownloadButton > button::before,
+.stFormSubmitButton > button::before,
+[data-testid="stFileUploaderDropzone"] button::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 2;
+    padding: 2px;
+    pointer-events: none;
+    background: conic-gradient(
+        from -90deg,
+        var(--accent) 0deg,
+        var(--accent) var(--edge-angle),
+        transparent var(--edge-angle),
+        transparent 360deg
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    transition: --edge-angle 800ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stButton > button > *,
+.stDownloadButton > button > *,
+.stFormSubmitButton > button > *,
+[data-testid="stFileUploaderDropzone"] button > * {
+    position: relative;
+    z-index: 3;
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+.stFormSubmitButton > button:hover,
+[data-testid="stFileUploaderDropzone"] button:hover {
+    --edge-angle: 360deg;
+    color: var(--accent) !important;
+    background: #ffffff !important;
+    border-color: #d9d9d4 !important;
+}
+
+.stButton > button:focus-visible,
+.stDownloadButton > button:focus-visible,
+.stFormSubmitButton > button:focus-visible,
+[data-testid="stFileUploaderDropzone"] button:focus-visible {
+    outline: 2px solid rgba(200,16,46,0.25) !important;
+    outline-offset: 2px !important;
+}
+
+/* Primary: preto sólido; no hover a borda vermelha percorre o contorno. */
+button[kind="primary"],
+button[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-primary"] {
+    color: #ffffff !important;
+    background: #111111 !important;
+    border-color: #111111 !important;
+}
+
+button[kind="primary"] p,
+button[data-testid="stBaseButton-primary"] p,
+[data-testid="stBaseButton-primary"] p {
+    color: #ffffff !important;
+}
+
+button[kind="primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-primary"]:hover {
+    color: #ffffff !important;
+    background: #111111 !important;
+    border-color: #111111 !important;
+}
+
+/* Alerts / mensagens — branco + carmesim, sem caixas coloridas pesadas. */
+[data-testid="stAlert"],
+[data-baseweb="notification"] {
+    color: var(--text) !important;
+    background: var(--accent-soft) !important;
+    border: 1px solid var(--accent-line) !important;
+    border-left: 3px solid var(--accent) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+[data-testid="stAlert"] > div,
+[data-baseweb="notification"] > div {
+    background: transparent !important;
+}
+
+[data-testid="stAlert"] svg,
+[data-baseweb="notification"] svg {
+    display: none !important;
+}
+
+[data-testid="stAlert"] p,
+[data-baseweb="notification"] p {
+    color: #2f2f2b !important;
+    font-size: 0.91rem !important;
+    line-height: 1.65 !important;
+}
+
+[data-testid="stAlert"] a { color: var(--accent) !important; }
+
+/* Spinner */
+[data-testid="stSpinner"] > div,
+[data-testid="stSpinner"] svg {
+    color: var(--accent) !important;
+}
+
+/* Uploaded-file rows */
+[data-testid="stFileUploaderFile"] {
+    background: #ffffff !important;
+    border-top: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+}
+
+::selection {
+    background: rgba(200,16,46,0.16);
+    color: #111111;
+}
+
+a {
+    color: var(--text) !important;
+    text-underline-offset: 0.18em;
+}
+
+a:hover { color: var(--accent) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+    .stButton > button::before,
+    .stDownloadButton > button::before,
+    .stFormSubmitButton > button::before,
+    [data-testid="stFileUploaderDropzone"] button::before {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+    .main .block-container {
+        padding-top: 2.6rem;
+        padding-left: 1.15rem;
+        padding-right: 1.15rem;
+    }
+
+    h1 {
+        min-height: 142px;
+        padding-top: 84px;
+        font-size: clamp(1.5rem, 6.2vw, 1.92rem) !important;
+        line-height: 1.10 !important;
+    }
+
+    h1::before {
+        left: 0;
+        width: 92px;
+        height: 54px;
+    }
+
+    h1::after {
+        right: 0;
+        width: 142px;
+        height: 56px;
+    }
+
+    .stTabs [data-baseweb="tab-list"] { gap: 1.1rem; }
+
+    [data-testid="stFileUploaderDropzone"] button {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+/* ================================================================
+   COMPLEMENTOS — feedback de envio, progresso e painéis.
+   Mesma linguagem visual: branco, linhas finas, carmesim de acento.
+   ================================================================ */
+
+/* Tipos de mensagem: o carmesim fica reservado para erros e avisos;
+   confirmações usam preto e informações neutras usam cinza. */
+[data-testid="stAlert"]:has([data-testid="stAlertContentSuccess"]) {
+    background: var(--surface-raised) !important;
+    border-color: var(--line) !important;
+    border-left-color: var(--text) !important;
+}
+
+[data-testid="stAlert"]:has([data-testid="stAlertContentInfo"]) {
+    background: var(--surface) !important;
+    border-color: var(--line) !important;
+    border-left-color: var(--muted-2) !important;
+}
+
+/* Notificação flutuante (toast) */
+[data-testid="stToast"] {
+    background: #ffffff !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line) !important;
+    border-left: 3px solid var(--text) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 10px 30px rgba(17, 17, 17, 0.08) !important;
+}
+
+/* Barra de progresso: fina, reta, carmesim */
+[data-testid="stProgress"] [role="progressbar"],
+[data-testid="stProgress"] [role="progressbar"] > div,
+[data-testid="stProgress"] [role="progressbar"] div {
+    border-radius: 0 !important;
+}
+
+[data-testid="stProgress"] p {
+    color: var(--muted) !important;
+    font-size: 0.82rem !important;
+}
+
+/* Expander (gerenciar casos) */
+[data-testid="stExpander"] details {
+    background: #ffffff !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+}
+
+[data-testid="stExpander"] summary p {
+    color: #242421 !important;
+    font-size: 0.70rem !important;
+    font-weight: 650 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+[data-testid="stExpander"] summary:hover p {
+    color: var(--accent) !important;
+}
+
+/* Tabela de casos */
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+}
+
+/* Checkbox de confirmação: frase longa, então sem a caixa alta dos rótulos */
+[data-testid="stCheckbox"] label p,
+[data-testid="stCheckbox"] [data-testid="stWidgetLabel"] p {
+    color: #2f2f2b !important;
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
+
+/* Botões desabilitados */
+.stButton > button:disabled,
+.stButton > button:disabled:hover {
+    color: #a5a5a0 !important;
+    background: #f7f7f5 !important;
+    border-color: var(--line) !important;
+    --edge-angle: 0deg;
+}
+
+/* Botão "x" para remover um vídeo já enviado (antes de alimentar).
+   As regras do uploader acima escondem <small> e ícones de botões;
+   sem estas exceções, o "x" de cada arquivo ficava invisível e não
+   havia como tirar ou trocar um vídeo depois do upload. */
+[data-testid="stFileUploader"] [data-testid="stFileChipDeleteBtn"] {
+    display: flex !important;
+}
+
+[data-testid="stFileUploader"] [data-testid="stFileChipDeleteBtn"] button {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 0.2rem !important;
+    color: var(--muted) !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+
+[data-testid="stFileUploader"] [data-testid="stFileChipDeleteBtn"] button::before {
+    display: none !important;
+}
+
+[data-testid="stFileUploader"] [data-testid="stFileChipDeleteBtn"] button:hover {
+    color: var(--accent) !important;
+}
+
+[data-testid="stFileUploader"] [data-testid="stFileChipDeleteBtn"] svg {
+    display: inline-block !important;
+    width: 1.15rem;
+    height: 1.15rem;
+}

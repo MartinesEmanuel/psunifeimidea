@@ -12,18 +12,13 @@ Aplicação local para apoiar a identificação de falhas mecânicas a partir de
 - **Processamento local:** vídeos, áudios, laudos e modelo ficam no computador; a interface padrão atende somente em `localhost`.
 - **Backup:** permite baixar a base, os áudios, os laudos e o modelo treinado em um único arquivo `.zip`.
 
-## Versão atual com sincronização entre computadores
+## Versão principal
 
-A versão atual está em [`midea completo/`](midea%20completo/), com base compartilhada entre PCs, pacotes para Android e importação de backups. Os arquivos da raiz são a versão anterior.
+A `main` contém a versão final aprovada do **app midea completo**, diretamente na raiz do repositório. O código, o instalador, o APK, os guias, a base de exemplos, o modelo treinado e os pacotes para celulares vêm dessa versão. Os arquivos históricos ficam em `_versoes_anteriores/`.
 
-Para executar a versão atual, use as instruções de instalação abaixo com o `requirements.txt` dessa pasta e inicie o Streamlit dentro dela:
+Execute `iniciar.bat` no Windows ou siga a execução manual abaixo no Linux/macOS. O `app.py` da raiz é a entrada da versão atual.
 
-```bash
-cd "midea completo"
-../.venv/bin/python -m streamlit run app.py
-```
-
-Configure a conexão em **Alimentação (Admin) → Celulares e sincronização**. Marque **Este computador é a Central** somente no PC responsável pelos celulares; os demais PCs trocam a base sem essa opção. A preparação do Supabase está em [`nuvem/COMO_CONFIGURAR.txt`](midea%20completo/nuvem/COMO_CONFIGURAR.txt). Senhas, chaves, dados e modelos locais não são incluídos no Git.
+Configure a conexão em **Alimentação (Admin) → Celulares e sincronização**. Marque **Este computador é a Central** somente no PC responsável pelos celulares; os demais PCs trocam a base sem essa opção. A preparação do Supabase está em [`nuvem/COMO_CONFIGURAR.txt`](nuvem/COMO_CONFIGURAR.txt). Senhas e chaves são locais e não entram no Git.
 
 ## Início rápido — Windows
 
@@ -67,7 +62,7 @@ Recomenda-se gravar entre 30 segundos e 3 minutos, próximo ao defeito, evitando
 
 ## Dados, backup e privacidade
 
-Os dados gerados pelo uso não são versionados pelo Git e ficam ao lado de `app.py`:
+A base de exemplos e o modelo da versão aprovada estão incluídos neste repositório. Novos arquivos gerados pelo uso continuam ignorados pelo Git e ficam ao lado de `app.py`:
 
 ```text
 dataset_master.csv       # casos, metadados e atributos calculados
@@ -80,14 +75,18 @@ Para migrar a base, use **Baixar backup (.zip)** na barra lateral ou copie esses
 
 ## Documentação
 
-- [Documentação técnica](docs/ARQUITETURA_TECNICA.md) — arquitetura, pipeline, persistência, modelo e operação para desenvolvimento.
-- [Guia técnico de instalação e operação](Guia_Tecnico_Diagnostico_Acustico_Imagens_por_Secao-1.pdf) — manual para TI, administradores e operadores.
-- [Instruções resumidas](LEIA-ME.txt) — instalação e uso básico.
+- [Documentação técnica histórica](docs/ARQUITETURA_TECNICA.md) — referência da arquitetura anterior; a versão atual está dividida em `diagnostico_acustico/`.
+- [Guia técnico de instalação e operação](Guia_Tecnico_Diagnostico_Acustico.pdf) — manual para TI, administradores e operadores.
+- [Instalação no celular](app_celular/COMO_INSTALAR_NO_CELULAR.txt) — instalação do APK.
 
 ## Estrutura do repositório
 
 ```text
-app.py                         # aplicação Streamlit e pipeline de ML
+app.py                         # entrada Streamlit da versão final
+diagnostico_acustico/           # pipeline de ML, sincronização e telas
+estilo/                        # identidade visual
+app_celular/                   # APK e instruções
+nuvem/                         # configuração do Supabase
 iniciar.bat                    # instalador/inicializador para Windows
 requirements.txt               # dependências Python
 .streamlit/config.toml         # configuração local do Streamlit
@@ -96,4 +95,4 @@ docs/ARQUITETURA_TECNICA.md    # documentação técnica
 
 ## Segurança
 
-A configuração padrão usa `address = "localhost"`, sem telemetria. Não altere para acesso de rede sem adicionar autenticação e controles de acesso: a aba administrativa permite incluir e excluir dados.
+A configuração padrão usa `address = "localhost"`, sem telemetria. O modo administrador exige uma senha local, criada no primeiro acesso. Senhas e chaves da sincronização não são versionadas. Mantenha o acesso local, salvo se houver uma configuração de rede e controles de acesso adequados.

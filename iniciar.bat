@@ -7,6 +7,7 @@ cd /d "%~dp0"
 set "PASTA=%~dp0"
 set "PYEXE=%PASTA%.venv\Scripts\python.exe"
 set "MARCA_REQUISITOS=.venv\requisitos_instalados.txt"
+set "MARCA_DEMUCS=.venv\demucs_baixado.txt"
 set "URL_PYTHON=https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe"
 :: O Windows limita caminhos a 260 caracteres. O arquivo mais fundo do .venv
 :: tem ~165 e a DLL mais funda ~120 -- e DLLs respeitam esse limite MESMO com
@@ -107,6 +108,25 @@ echo Baixando o modelo de linguagem em portugues ^(spaCy^)...
 if not "%errorlevel%"=="0" goto :FALHA_SPACY
 :SPACY_OK
 echo [OK] Modelo de linguagem instalado.
+
+:: ==========================================================
+:: MODELO DE REMOCAO DE VOZ (Demucs, ~80 MB) -- baixado ja na
+:: instalacao, para o programa nao depender de internet no uso.
+:: ==========================================================
+if exist "%MARCA_DEMUCS%" goto :DEMUCS_OK
+echo.
+echo Baixando o modelo de remocao de voz ^(Demucs, ~80 MB^)...
+"%PYEXE%" -c "from demucs.pretrained import get_model; get_model('htdemucs')"
+if not "%errorlevel%"=="0" goto :DEMUCS_AVISO
+echo ok> "%MARCA_DEMUCS%"
+:DEMUCS_OK
+echo [OK] Modelo de remocao de voz instalado.
+goto :DEMUCS_FIM
+:DEMUCS_AVISO
+echo AVISO: nao foi possivel baixar o modelo de remocao de voz agora.
+echo O programa funciona normalmente; o download sera tentado de novo
+echo na proxima vez que o iniciar.bat rodar com internet.
+:DEMUCS_FIM
 
 :: ==========================================================
 :: CONFIGURACAO DO STREAMLIT

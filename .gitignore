@@ -10,15 +10,20 @@ modelos/
 dataset_master.csv
 
 # Artefatos locais do Streamlit
-.streamlit/secrets.toml
+**/.streamlit/secrets.toml
 
 # Configurações e dados locais da versão com sincronização
-.streamlit/senha_admin.json
-.streamlit/sincronizacao.json
-.streamlit/sincronizacao_estado.json
-.streamlit/base_compartilhada.json
+**/.streamlit/senha_admin.json
+**/.streamlit/sincronizacao.json
+**/.streamlit/sincronizacao_estado.json
+**/.streamlit/base_compartilhada.json
 base_conhecimento.json
 caixa_de_entrada/
 publicacoes/
 .restaurando_*/
 backup_automatico_antes_de_restaurar_*.zip
+
+# Credenciais e caches locais
+.env
+.env.*
+!.env.example
