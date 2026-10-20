@@ -3,6 +3,13 @@
 __pycache__/
 *.py[cod]
 
+# Flutter/Dart: dependências, caches e builds locais
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+
 # Arquivos gerados pelo uso do aplicativo
 audios_conhecidos/
 textos_conhecidos/
